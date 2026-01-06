@@ -1,45 +1,118 @@
-# Ejercicio Introductorio: Clean Architecture sin frameworks
+# Clean Architecture Counter
 
-Queremos ver cómo la dirección de las dependencias mantiene al núcleo de negocio independiente de los detalles externos.
+Este proyecto demuestra cómo aplicar los principios de Clean Architecture en una aplicación frontend. Aunque es un ejemplo simple (un contador), la estructura está diseñada para escalar y mantener la separación de responsabilidades.
 
-## Idea clave de Clean Architecture
-- El núcleo (dominio + casos de uso) **no conoce detalles externos**.
-- Las dependencias siempre apuntan hacia adentro: las capas externas dependen de las internas, nunca al revés.
+## Arquitectura
 
-## Premisa del ejercicio
-- El sistema debe permitir registrar un usuario.
-- La lógica de negocio no debe saber cómo ni dónde se guarda el usuario.
-- La persistencia es un detalle intercambiable (memoria, archivo, base de datos, API, etc.).
+El proyecto sigue los principios de Clean Architecture, organizando el código en capas bien definidas:
 
-## Capas involucradas (sin tecnicismos)
-- **Dominio:** entidades y contratos (interfaces) que describen qué necesita la lógica.
-- **Aplicación:** casos de uso que coordinan la lógica usando las interfaces del dominio.
-- **Infraestructura:** implementaciones concretas de los contratos (persistencia, IO, etc.).
-- **Composición:** punto de entrada que ensambla dependencias y pone todo a funcionar.
-
-## Instrucciones para el ejercicio
-- Separa el código en dominio, aplicación e infraestructura.
-- Define interfaces para desacoplar la persistencia (`UserRepository`).
-- Implementa la persistencia en memoria (`InMemoryUserRepository`) sin tocar dominio ni aplicación.
-- No importes infraestructura dentro del dominio ni del caso de uso.
-- Respeta la dirección de dependencias: aplicación depende de dominio; infraestructura depende de dominio; composición conoce a todos.
-- Mantén el código simple, sin frameworks ni librerías externas.
-
-## Estructura sugerida
 ```
 src/
-  domain/
-  application/
-  infrastructure/
-  main.ts
+├── domain/           # Capa de Dominio (Entidades y Reglas de Negocio)
+│   └── counter/
+│       ├── counter.entity.ts      # Entidad Counter
+│       ├── counter.model.ts       # Modelo de datos
+│       └── counter.repository.ts  # Interfaz del repositorio
+│
+├── aplication/       # Capa de Aplicación (Casos de Uso)
+│   └── counter/
+│       └── update-counter.usecase.ts  # Caso de uso: Incrementar contador
+│
+├── infraestructure/  # Capa de Infraestructura (Implementaciones)
+│   └── counter/
+│       ├── counter.adapter.ts     # Adaptador de datos
+│       └── counter.store.ts       # Store con patrón Observer
+│
+└── ui/              # Capa de Presentación (React UI)
+    ├── src/
+    │   ├── app/
+    │   │   ├── App.tsx           # Componente principal
+    │   │   └── router.tsx        # Configuración de rutas
+    │   ├── components/
+    │   │   └── CounterView.tsx   # Vista del contador
+    │   ├── hooks/
+    │   │   └── useCounter.ts     # Hook personalizado
+    │   └── pages/
+    │       └── CounterPage.tsx   # Página del contador
+    └── package.json
 ```
 
-## Comportamiento esperado
-- Al ejecutar `ts-node src/main.ts` (o compilar y correr con `node`), se registra un usuario.
-- El caso de uso devuelve el usuario creado y se imprime por consola.
-- Desde la capa de aplicación no se sabe si el usuario quedó en memoria, archivo o base de datos.
+### Capas de la Arquitectura
 
-## Preguntas de reflexión
-1. ¿Qué pasaría si cambia la forma de persistir los datos?
-2. ¿Qué parte del sistema debería permanecer estable?
-3. ¿Quién depende de quién en esta solución?
+#### 1. **Domain** (Dominio)
+- Contiene las entidades y reglas de negocio fundamentales
+- No tiene dependencias de otras capas
+- Define interfaces (contratos) que otras capas deben implementar
+
+#### 2. **Application** (Aplicación)
+- Contiene los casos de uso de la aplicación
+- Orquesta el flujo de datos entre capas
+- Depende solo de la capa de dominio
+
+#### 3. **Infrastructure** (Infraestructura)
+- Implementa las interfaces definidas en el dominio
+- Maneja el estado y la persistencia
+- Implementa el patrón Observer para notificaciones de cambios
+
+#### 4. **UI** (Interfaz de Usuario)
+- Capa de presentación con React
+- Consume los casos de uso a través de hooks
+- No contiene lógica de negocio
+
+## 🚀 Tecnologías
+
+- **React 19.2.0** - Biblioteca de UI
+- **TypeScript 5.9.3** - Tipado estático
+- **Vite 7.2.4** - Build tool y dev server
+- **React Router DOM 7.11.0** - Enrutamiento
+- **ESLint** - Linting
+- **Lodash.debounce** - Utilidades
+
+## 📦 Instalación
+
+1. **Clonar el repositorio**
+   ```bash
+   git clone <url-del-repositorio>
+   cd clean-architecture-counter
+   ```
+
+2. **Instalar dependencias de la UI**
+   ```bash
+   cd src/ui
+   npm install
+   ```
+
+## 🎯 Uso
+
+### Modo Desarrollo
+
+```bash
+cd src/ui
+npm run dev
+```
+
+La aplicación estará disponible en `http://localhost:5173`
+
+### Build de Producción
+
+```bash
+cd src/ui
+npm run build
+```
+
+Los archivos compilados se generarán en `src/ui/dist/`
+
+### Preview de Producción
+
+```bash
+cd src/ui
+npm run preview
+```
+
+### Linting
+
+```bash
+cd src/ui
+npm run lint
+```
+
